@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer di Produzione</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 600px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-group label {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .input-group input, .input-group select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #time {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .stop {
+            background-color: #f44336;
+        }
+
+        .stop:hover {
+            background-color: #e53935;
+        }
+
+        .reset {
+            background-color: #ffa500;
+        }
+
+        .reset:hover {
+            background-color: #ff8c00;
+        }
+
+        .end {
+            background-color: #008CBA;
+        }
+
+        .end:hover {
+            background-color: #006f8e;
+        }
+
+        .log-container {
+            margin-top: 20px;
+        }
+
+        .log-container h3 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .log-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .log-container li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            word-wrap: break-word;
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+
+        .log-container li span {
+            margin-right: 10px;
+            font-weight: 500;
+            color: #333;
+            text-align: left;
+            width: 13%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        /* Checkbox */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-container input {
+            margin-right: 10px;
+        }
+
+        /* Style for the export button */
+        .export-button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .export-button:hover {
+            background-color: #0056b3;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* Style for delete button */
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Gestione Produzione</h2>
+    
+    <!-- Menu a tendina per selezionare l'area di lavoro -->
+    <div class="input-group">
+        <label for="area">Area di Lavoro</label>
+        <select id="area" required>
+            <option value="" disabled selected>Seleziona l'area di lavoro</option>
+            <option value="Meccanico">Meccanico</option>
+            <option value="Idraulico">Idraulico</option>
+            <option value="Frigo">Frigo</option>
+            <option value="Cablaggio">Cablaggio</option>
+            <option value="Collaudo">Collaudo</option>
+            <option value="Isolamento">Isolamento</option>
+            <option value="Finitura">Finitura</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label for="username">Nome Utente</label>
+        <input type="text" id="username" placeholder="Inserisci il nome utente" required>
+    </div>
+
+    <div class="input-group">
+        <label for="numeroOc">Numero Oc</label>
+        <input type="text" id="numeroOc" placeholder="Inserisci il numero Oc" required>
+    </div>
+
+    <div class="input-group">
+        <label for="grandezza">Grandezza</label>
+        <input type="text" id="grandezza" placeholder="Inserisci la grandezza" required>
+    </div>
+
+    <div class="input-group">
+        <label for="matricola">Matricola</label>
+        <input type="text" id="matricola" placeholder="Inserisci la matricola" required>
+    </div>
+
+    <div class="input-group">
+        <label for="dataInizio">Data Inizio</label>
+        <input type="date" id="dataInizio" required>
+    </div>
+
+    <div id="time">00:00:00</div>
+    <button id="startButton">Avvia</button>
+    <button id="stopButton" class="stop" disabled>Ferma</button>
+    <button id="endButton" class="end" disabled>Fine</button>
+    <button id="resetButton" class="reset">Reset</button>
+
+    <div class="log-container">
+        <h3>Storico Tempi:</h3>
+        <ul id="logList" class="log-list"></ul>
+        <button class="export-button" id="exportButton" disabled>Esporta in Excel</button>
+    </div>
+</div>
+
+<script>
+    let timer;
+    let isRunning = false;
+    let seconds = 0;
+    let minutes = 0;
+    let hours = 0;
+
+    const timeDisplay = document.getElementById('time');
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const endButton = document.getElementById('endButton');
+    const resetButton = document.getElementById('resetButton');
+    const logList = document.getElementById('logList');
+    const exportButton = document.getElementById('exportButton');
+    const areaSelect = document.getElementById('area');
+    const usernameInput = document.getElementById('username');
+    const numeroOcInput = document.getElementById('numeroOc');
+    const grandezzaInput = document.getElementById('grandezza');
+    const matricolaInput = document.getElementById('matricola');
+    const dataInizioInput = document.getElementById('dataInizio');
+
+    function formatTime() {
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function createLogItem(data) {
+        const logItem = document.createElement('li');
+        logItem.innerHTML = `
+            <div class="checkbox-container">
+                <input type="checkbox" class="select-item">
+            </div>
+            <span class="area">${data.area}</span>
+            <span class="user">${data.user}</span>
+            <span class="oc">${data.oc}</span>
+            <span class="size">${data.size}</span>
+            <span class="matricola">${data.matricola}</span>
+            <span class="start-date">${data.startDate}</span>
+            <span class="time">${data.time}</span>
+            <button class="delete-btn">Elimina</button>
+        `;
+        
+        const deleteBtn = logItem.querySelector('.delete-btn');
+        deleteBtn.addEventListener('click', () => {
+            logItem.remove();
+            saveLogs();
+            if (logList.children.length === 0) {
+                exportButton.disabled = true;
+            }
+        });
+        
+        return logItem;
+    }
+
+    function saveLogs() {
+        const logs = [];
+        document.querySelectorAll("#logList li").forEach((li) => {
+            const data = {
+                area: li.querySelector('.area').textContent,
+                user: li.querySelector('.user').textContent,
+                oc: li.querySelector('.oc').textContent,
+                size: li.querySelector('.size').textContent,
+                matricola: li.querySelector('.matricola').textContent,
+                startDate: li.querySelector('.start-date').textContent,
+                time: li.querySelector('.time').textContent,
+            };
+            logs.push(data);
+        });
+        localStorage.setItem('logs', JSON.stringify(logs));
+    }
+
+    function loadLogs() {
+        const logs = JSON.parse(localStorage.getItem('logs')) || [];
+        logs.forEach((log) => {
+            const logItem = createLogItem(log);
+            logList.appendChild(logItem);
+        });
+        if (logList.children.length > 0) {
+            exportButton.disabled = false;
+        }
+    }
+
+    function addToLog() {
+        const fields = [
+            { id: 'username', error: 'Inserisci il nome utente.' },
+            { id: 'numeroOc', error: 'Inserisci il numero OC.' },
+            { id: 'grandezza', error: 'Inserisci la grandezza.' },
+            { id: 'matricola', error: 'Inserisci la matricola.' },
+            { id: 'dataInizio', error: 'Seleziona una data di inizio.' },
+            { id: 'area', error: 'Seleziona un\'area di lavoro.' }
+        ];
+
+        let isValid = true;
+        fields.forEach(({ id, error }) => {
+            const input = document.getElementById(id);
+            const errorElement = input.nextElementSibling;
+
+            if (!input.value) {
+                if (!errorElement || !errorElement.classList.contains('error-message')) {
+                    const errorNode = document.createElement('span');
+                    errorNode.textContent = error;
+                    errorNode.classList.add('error-message');
+                    input.insertAdjacentElement('afterend', errorNode);
+                }
+                isValid = false;
+            } else if (errorElement && errorElement.classList.contains('error-message')) {
+                errorElement.remove();
+            }
+        });
+
+        if (!isValid) return;
+
+        const user = document.getElementById('username').value;
+        const oc = document.getElementById('numeroOc').value;
+        const size = document.getElementById('grandezza').value;
+        const matricola = document.getElementById('matricola').value;
+        const startDate = document.getElementById('dataInizio').value;
+        const area = areaSelect.value;
+        const time = formatTime();
+
+        const logItem = createLogItem({
+            area,
+            user,
+            oc,
+            size,
+            matricola,
+            startDate,
+            time
+        });
+
+        logList.appendChild(logItem);
+        saveLogs();
+        exportButton.disabled = false;
+    }
+
+    startButton.addEventListener('click', () => {
+        if (!isRunning) {
+            isRunning = true;
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            endButton.disabled = false;
+
+            timer = setInterval(() => {
+                seconds++;
+                if (seconds >= 60) {
+                    seconds = 0;
+                    minutes++;
+                }
+                if (minutes >= 60) {
+                    minutes = 0;
+                    hours++;
+                }
+                timeDisplay.textContent = formatTime();
+            }, 1000);
+        }
+    });
+
+    stopButton.addEventListener('click', () => {
+        clearInterval(timer);
+        isRunning = false;
+        startButton.disabled = false;
+        stopButton.disabled = true;
+    });
+
+    endButton.addEventListener('click', () => {
+        clearInterval(timer);
+        addToLog();
+        isRunning = false;
+        startButton.disabled = false;
+        stopButton.disabled = true;
+        endButton.disabled = true;
+    });
+
+    resetButton.addEventListener('click', () => {
+        clearInterval(timer);
+        seconds = 0;
+        minutes = 0;
+        hours = 0;
+        isRunning = false;
+        timeDisplay.textContent = formatTime();
+        startButton.disabled = false;
+        stopButton.disabled = true;
+        endButton.disabled = true;
+
+        // Reset dei campi di input
+        usernameInput.value = '';
+        numeroOcInput.value = '';
+        grandezzaInput.value = '';
+        matricolaInput.value = '';
+        dataInizioInput.value = '';
+        areaSelect.value = '';
+    });
+
+    exportButton.addEventListener('click', () => {
+        let csvContent = "Area,User,OC,Size,Matricola,Start Date,Time\n";
+        
+        // Estrae solo le righe selezionate
+        document.querySelectorAll("#logList li").forEach((li) => {
+            const checkbox = li.querySelector(".select-item");
+            if (checkbox.checked) {
+                const data = Array.from(li.querySelectorAll("span")).map(span => span.textContent);
+                csvContent += data.join(",") + "\n";
+            }
+        });
+
+        if (csvContent === "Area,User,OC,Size,Matricola,Start Date,Time\n") {
+            alert("Seleziona almeno una riga da esportare.");
+            return;
+        }
+
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", "storico_tempi_selezionati.csv");
+        link.click();
+    });
+
+    window.onload = loadLogs; // Carica i log all'avvio della pagina
+</script>
+</body>
+</html>
